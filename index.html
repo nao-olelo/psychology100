@@ -67,6 +67,7 @@ header p {
   padding: 30px;
   box-shadow: 0 4px 20px rgba(0,0,0,.06);
   touch-action: pan-y;
+  transition: transform 0.25s ease, opacity 0.25s ease;
 }
 
 .category {
@@ -1719,20 +1720,67 @@ document.addEventListener("keydown", e => {
 showEffect(0);
 // スマホのスワイプ操作
 let startX = 0;
+let startY = 0;
 
-document.getElementById("card").addEventListener("touchstart", function(e) {
+const swipeCard = document.getElementById("card");
+
+swipeCard.addEventListener("touchstart", function(e) {
   startX = e.touches[0].clientX;
+  startY = e.touches[0].clientY;
 }, { passive: true });
 
-document.getElementById("card").addEventListener("touchend", function(e) {
+swipeCard.addEventListener("touchend", function(e) {
   const endX = e.changedTouches[0].clientX;
-  const distance = endX - startX;
+  const endY = e.changedTouches[0].clientY;
 
-  if (Math.abs(distance) > 50) {
-    if (distance < 0) {
-      nextEffect();
+  const distanceX = endX - startX;
+  const distanceY = endY - startY;
+
+  // 横方向に50px以上、かつ縦より横の動きが大きい場合
+  if (
+    Math.abs(distanceX) > 50 &&
+    Math.abs(distanceX) > Math.abs(distanceY)
+  ) {
+
+    // 左スワイプ
+    if (distanceX < 0) {
+
+      swipeCard.style.transform = "translateX(-40px)";
+      swipeCard.style.opacity = "0";
+
+      setTimeout(function() {
+        nextEffect();
+
+        swipeCard.style.transition = "none";
+        swipeCard.style.transform = "translateX(40px)";
+
+        setTimeout(function() {
+          swipeCard.style.transition = "transform 0.25s ease, opacity 0.25s ease";
+          swipeCard.style.transform = "translateX(0)";
+          swipeCard.style.opacity = "1";
+        }, 20);
+
+      }, 200);
+
+    // 右スワイプ
     } else {
-      prevEffect();
+
+      swipeCard.style.transform = "translateX(40px)";
+      swipeCard.style.opacity = "0";
+
+      setTimeout(function() {
+        prevEffect();
+
+        swipeCard.style.transition = "none";
+        swipeCard.style.transform = "translateX(-40px)";
+
+        setTimeout(function() {
+          swipeCard.style.transition = "transform 0.25s ease, opacity 0.25s ease";
+          swipeCard.style.transform = "translateX(0)";
+          swipeCard.style.opacity = "1";
+        }, 20);
+
+      }, 200);
     }
   }
 }, { passive: true });
