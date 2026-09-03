@@ -1721,69 +1721,123 @@ showEffect(0);
 // スマホのスワイプ操作
 let startX = 0;
 let startY = 0;
+let currentX = 0;
+let isDragging = false;
 
 const swipeCard = document.getElementById("card");
 
 swipeCard.addEventListener("touchstart", function(e) {
   startX = e.touches[0].clientX;
   startY = e.touches[0].clientY;
+  currentX = 0;
+  isDragging = true;
+
+  swipeCard.style.transition = "none";
+}, { passive: true });
+
+swipeCard.addEventListener("touchmove", function(e) {
+  if (!isDragging) return;
+
+  const x = e.touches[0].clientX;
+  const y = e.touches[0].clientY;
+
+  const distanceX = x - startX;
+  const distanceY = y - startY;
+
+  // 縦スクロール中なら何もしない
+  if (Math.abs(distanceY) > Math.abs(distanceX)) {
+    return;
+  }
+
+  currentX = distanceX;
+
+  // 指についてくる
+  swipeCard.style.transform = `translateX(${currentX}px) rotate(${currentX * 0.03}deg)`;
 }, { passive: true });
 
 swipeCard.addEventListener("touchend", function(e) {
-  const endX = e.changedTouches[0].clientX;
-  const endY = e.changedTouches[0].clientY;
+  if (!isDragging) return;
 
-  const distanceX = endX - startX;
-  const distanceY = endY - startY;
+  isDragging = false;
 
-  // 横方向に50px以上、かつ縦より横の動きが大きい場合
-  if (
-    Math.abs(distanceX) > 50 &&
-    Math.abs(distanceX) > Math.abs(distanceY)
-  ) {
+  const distance = currentX;
 
-    // 左スワイプ
-    if (distanceX < 0) {
+  // 50px以上スワイプしたらページ移動
+  if (Math.abs(distance) > 50) {
 
-      swipeCard.style.transform = "translateX(-40px)";
+    // 左スワイプ → 次へ
+    if (distance < 0) {
+
+      swipeCard.style.transition =
+        "transform 0.2s ease, opacity 0.2s ease";
+
+      swipeCard.style.transform =
+        "translateX(-100vw) rotate(-8deg)";
+
       swipeCard.style.opacity = "0";
 
       setTimeout(function() {
         nextEffect();
 
         swipeCard.style.transition = "none";
-        swipeCard.style.transform = "translateX(40px)";
+        swipeCard.style.transform =
+          "translateX(100vw) rotate(8deg)";
 
         setTimeout(function() {
-          swipeCard.style.transition = "transform 0.25s ease, opacity 0.25s ease";
-          swipeCard.style.transform = "translateX(0)";
+          swipeCard.style.transition =
+            "transform 0.25s ease, opacity 0.25s ease";
+
+          swipeCard.style.transform =
+            "translateX(0) rotate(0deg)";
+
           swipeCard.style.opacity = "1";
         }, 20);
 
       }, 200);
 
-    // 右スワイプ
+    // 右スワイプ → 前へ
     } else {
 
-      swipeCard.style.transform = "translateX(40px)";
+      swipeCard.style.transition =
+        "transform 0.2s ease, opacity 0.2s ease";
+
+      swipeCard.style.transform =
+        "translateX(100vw) rotate(8deg)";
+
       swipeCard.style.opacity = "0";
 
       setTimeout(function() {
         prevEffect();
 
         swipeCard.style.transition = "none";
-        swipeCard.style.transform = "translateX(-40px)";
+        swipeCard.style.transform =
+          "translateX(-100vw) rotate(-8deg)";
 
         setTimeout(function() {
-          swipeCard.style.transition = "transform 0.25s ease, opacity 0.25s ease";
-          swipeCard.style.transform = "translateX(0)";
+          swipeCard.style.transition =
+            "transform 0.25s ease, opacity 0.25s ease";
+
+          swipeCard.style.transform =
+            "translateX(0) rotate(0deg)";
+
           swipeCard.style.opacity = "1";
         }, 20);
 
       }, 200);
     }
+
+  } else {
+
+    // 少ししか動かさなかったら元に戻る
+    swipeCard.style.transition =
+      "transform 0.25s ease";
+
+    swipeCard.style.transform =
+      "translateX(0) rotate(0deg)";
   }
-}, { passive: true });
+
+  currentX = 0;
+});
   
 </script>
 
