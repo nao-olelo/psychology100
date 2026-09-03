@@ -66,6 +66,7 @@ header p {
   border-radius: 24px;
   padding: 30px;
   box-shadow: 0 4px 20px rgba(0,0,0,.06);
+  touch-action: pan-y;
 }
 
 .category {
@@ -1716,7 +1717,36 @@ document.addEventListener("keydown", e => {
 });
 
 showEffect(0);
+// スマホのスワイプ操作
+let touchStartX = 0;
+let touchStartY = 0;
 
+const card = document.getElementById("card");
+
+card.addEventListener("touchstart", function(e) {
+  touchStartX = e.changedTouches[0].screenX;
+  touchStartY = e.changedTouches[0].screenY;
+}, { passive: true });
+
+card.addEventListener("touchend", function(e) {
+  const touchEndX = e.changedTouches[0].screenX;
+  const touchEndY = e.changedTouches[0].screenY;
+
+  const diffX = touchEndX - touchStartX;
+  const diffY = touchEndY - touchStartY;
+
+  // 横方向の移動が60px以上で、縦方向より大きい場合だけ反応
+  if (Math.abs(diffX) > 60 && Math.abs(diffX) > Math.abs(diffY)) {
+    if (diffX < 0) {
+      // 左スワイプ → 次へ
+      nextEffect();
+    } else {
+      // 右スワイプ → 前へ
+      prevEffect();
+    }
+  }
+}, { passive: true });
+  
 </script>
 
 </body>
